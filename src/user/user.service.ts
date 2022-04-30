@@ -10,6 +10,7 @@ import { UserEntity } from './user.entity';
 // Dto
 import { LoginUserDto } from './dto/login-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 // Interfaces and types
 import { IUserResponse } from './types/user-response.interface';
 
@@ -53,6 +54,14 @@ export class UserService {
     delete user.password;
 
     return user;
+  }
+
+  async updateUser(userId: number, updateUserDto: UpdateUserDto): Promise<UserEntity> {
+    const user = await this.findById(userId);
+
+    Object.assign(user, updateUserDto);
+
+    return await this.userRepository.save(user);
   }
 
   findById(id: number): Promise<UserEntity> {
