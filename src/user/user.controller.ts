@@ -28,16 +28,16 @@ import { IUserResponse } from './types/user-response.interface';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @UsePipes(new ValidationPipe())
   @Post('users')
+  @UsePipes(new ValidationPipe())
   async createUser(@Body('user') createUserDto: CreateUserDto): Promise<IUserResponse> {
     const user = await this.userService.createUser(createUserDto);
 
     return this.userService.buildUserResponse(user);
   }
 
-  @UsePipes(new ValidationPipe())
   @Post('users')
+  @UsePipes(new ValidationPipe())
   async login(@Body('user') loginUserDto: LoginUserDto): Promise<IUserResponse> {
     const user = await this.userService.loginUser(loginUserDto);
 
