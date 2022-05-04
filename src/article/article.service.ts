@@ -7,10 +7,12 @@ import { DeleteResult, getRepository, Repository } from 'typeorm';
 // Entities
 import { ArticleEntity } from './article.entity';
 import { UserEntity } from '@app/user/user.entity';
+import { FollowEntity } from '@app/profile/follow.entity';
 // Dto
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 // Interfaces and types
+import { IFeedQuery } from './types/feed-query.interface';
 import { IArticleQuery } from './types/article-query.interface';
 import { IArticleResponse } from './types/article-response.interface';
 import { IAllArticlesResponse } from './types/all-articles-response.interface';
@@ -19,6 +21,7 @@ import { IAllArticlesResponse } from './types/all-articles-response.interface';
 export class ArticleService {
   constructor(
     @InjectRepository(ArticleEntity) private readonly articleRepository: Repository<ArticleEntity>,
+    @InjectRepository(FollowEntity) private readonly followRepository: Repository<FollowEntity>,
     @InjectRepository(UserEntity) private readonly userRepository: Repository<UserEntity>,
   ) {}
 
@@ -79,6 +82,37 @@ export class ArticleService {
     }));
 
     return { articles: articlesWithFavorites, articlesCount };
+  }
+
+  async getFeed(currentUserId: number, query: IFeedQuery): Promise<IAllArticlesResponse> {
+    const follows = await this.followRepository.find({ followerId: currentUserId });
+
+    if (follows.length === 0) {
+      return { articles: [], articlesCount: 0 };
+    }
+
+    const followingUserIds = follows.map(({ followingId }) => followingId);
+
+    const queryBuilder = getRepository(ArticleEntity)
+      .createQueryBuilder('articles')
+      .leftJoinAndSelect('articles.author', 'author')
+      .where('articles.authorId IN (:...ids)', { ids: followingUserIds });
+
+    queryBuilder.orderBy('articles.createdAt', 'DESC');
+
+    const articlesCount = await queryBuilder.getCount();
+
+    if (query.limit) {
+      queryBuilder.limit(query.limit);
+    }
+
+    if (query.offset) {
+      queryBuilder.offset(query.offset);
+    }
+
+    const articles = await queryBuilder.getMany();
+
+    return { articles, articlesCount };
   }
 
   async createArticle(

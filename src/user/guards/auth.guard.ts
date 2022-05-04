@@ -9,7 +9,7 @@ import {
 // Packages
 import { Observable } from 'rxjs';
 // Interfaces and types
-import { IExpressRequest } from '@app/types/express-request.interface';
+import { IExpressRequest } from '@app/shared/types/express-request.interface';
 
 @Injectable()
 export class AuthGuard implements CanActivate {

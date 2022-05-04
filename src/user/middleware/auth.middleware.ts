@@ -6,7 +6,7 @@ import { Response, NextFunction } from 'express';
 // Services
 import { UserService } from '../user.service';
 // Interfaces and types
-import { IExpressRequest } from '@app/types/express-request.interface';
+import { IExpressRequest } from '@app/shared/types/express-request.interface';
 
 @Injectable()
 export class AuthMiddleware implements NestMiddleware {
